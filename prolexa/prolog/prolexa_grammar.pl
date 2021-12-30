@@ -18,6 +18,8 @@ iverb(p,M)			--> [Verb],   {pred2gr(_P,1,v/Verb,M)}.
 % unary predicates for adjectives, nouns and verbs
 pred(human,   1,[a/human,n/human]).
 pred(mortal,  1,[a/mortal,n/mortal]).
+pred(immortal,  1,[a/immortal,n/immortal]).
+
 pred(man,     1,[a/male,n/man]).
 pred(woman,   1,[a/female,n/woman]).
 pred(married, 1,[a/married]).
@@ -59,12 +61,12 @@ sword --> [that].
 
 % most of this follows Simply Logical, Chapter 7
 
+sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).%, [sent1].
 
 sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).%, [sent1].
 sentence1([(L:-true)]) --> proper_noun(N,X),verb_phrase(N,X=>L).%, [sent2].
 
 
-%sentence1(C) --> verb_phrase(N,M1), determiner(N,M1,M2,C), noun(N,M2).%, [sent1].
 
 sentence1(C) --> reverse_verb_phrase(N,M1), determiner_reverse(N,M1,M2,C),  noun(N,M2).%, [sent1].
 
@@ -73,12 +75,7 @@ sentence1(C) --> determiner_neg_double(N,M1,M2,C), noun(N,M1), double_verb_phras
 sentence1([(not(L):-true)]) --> proper_noun(N,X),neg_verb_phrase(N,X=>L).%, [sent3].
 
 
-% example "pixie is not red"
-
-%sentence1([(not(M1):-not(M2))]) --> determiner(N,M1,M2,[(M1:-M2)]), noun(N,M1), neg_verb_phrase(N,M2).
-
-% example "pixels are red, blue or green"
-
+%NOTE: DEFAULT DETERMINERS FOR NEGATIVES
 
 verb_phrase(s,M) --> [is],property(s,M).
 verb_phrase(p,M) --> [are],property(p,M).
@@ -100,6 +97,8 @@ double_verb_phrase(N,M) --> [doesnt], iverb(N,M).
 property(N,M) --> adjective(N,M).
 property(s,M) --> [a],noun(s,M).
 property(p,M) --> noun(p,M).
+
+determiner(s, X=>B, X=>H,[default(H:-B)]) --> [usually, every].
 
 determiner(s,X=>B,X=>H,[(H:-B)]) --> [every].
 determiner(p,X=>B,X=>H,[(H:-B)]) --> [all].
@@ -126,8 +125,9 @@ determiner_neg(p,X=>B,X=>H,[(not(H):-B)]) --> [all].
 
 proper_noun(s,tweety) --> [tweety].
 proper_noun(s,peter) --> [peter].
-proper_noun(s,subin) --> [subin].
-proper_noun(s,pixie) --> [pixie].
+proper_noun(s,matt) --> [matt].
+proper_noun(s,alex) --> [alex].
+proper_noun(s,edward) --> [edward].
 
 
 %%% questions %%%

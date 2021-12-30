@@ -108,9 +108,6 @@ prove_rb(A,Rulebase,P0,P):- %We have A :- true, tries to find A:-B then prove B 
 	prove_rb(B,Rulebase,[p(A,Rule)|P0],P).
 
 
-% prove_rb(A,Rulebase,P0,P):- %We have A :- true, tries to find A:-not(B) then prove not(B) :- true
-%     find_clause((B:-not(A)),Rule,Rulebase), write_debug(Rule),  %works because (uniquely) A :- not(B) is equiv. to B :- not(A)
-% 	prove_rb(not(B),Rulebase,[p(A,Rule)|P0],P).
 
 % top-level version that ignores proof
 prove_rb(Q,RB):-
@@ -144,6 +141,8 @@ all_rules(Answer):-
 
 % convert rule to sentence (string)
 rule2message(Rule,Message):-
+	% (write_debug(Rule = default(C)),
+	% write_debug(C); write_debug('not default')),
 	phrase(sentence1(Rule),Sentence),
 	atomics_to_string(Sentence," ",Message).
 
