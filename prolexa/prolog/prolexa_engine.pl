@@ -8,7 +8,7 @@
 %	]).
 
 :- consult(library).
-
+:- op(600, xfy, '=>').
 
 %%% Main question-answering engine adapted from nl_shell.pl %%%
 
@@ -187,6 +187,10 @@ all_answers(PN,Answer):-
 	maplist(prove_exists,Queries,Msg2),
 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
 	message_testing(Messages2, Clauses),
+	write_debug("messages 2"),
+	write_debug(Messages2),
+
+	write_debug("CLAUSES:"),
 	write_debug(Clauses),
 	% ==================================================
 
@@ -196,11 +200,11 @@ all_answers(PN,Answer):-
 
 % collect everything that can be proved about a particular Proper Noun
 collect_facts(PN,New_rules):-
-	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
-  write_debug(Queries),
+	findall(Q,(pred(P,1,_),Q=..[P,peter]),Queries), % collect known predicates from grammar
+  %write_debug(Queries),
 	maplist(prove_exists,Queries,Msg2),
 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
-	%write_debug(Messages2),
+
 
 	message_testing(Messages2, New_rules),
 	write_debug(New_rules).
@@ -211,20 +215,31 @@ build_existential_rules(List, Pairs):-
 
 message_testing(Messages, Clauses) :-
 	write_debug("\nMessages: "),
-	names(Names),
-	write_debug(Names),
+	%names(Names),
+	%write_debug("\nNames:"),
+	%write_debug(Names),
 	write_debug(Messages),
 	build_existential_rules(Messages, Clauses).
 
 names(Names):-
-	findall(Q,(pred(teacher,1,_),Q=..[teacher,PN]),Attributes),
+	findall(Q,(pred(P,1,_),Q=..[P,PN]),Attributes),
+	write_debug('\nAttributes:'),
+	write_debug(Attributes),
 	maplist(clauses_get,Attributes,Msg3),
+	Names = [peter, subin, pixie, tweety],
 	delete(Msg3,"Sorry, I don\'t think this is the case",Msg4),
-	write_debug('msg4'),
+	write_debug("MESSAGE 4"),
 	write_debug(Msg4).
+	% write_debug(Msg4),
+	% names_from_list(Msg4, Names).
 
-names_from_list([], L).
-names_from_list([H|L1], [L]):-names_from_list([L1], [H|L]).
+% names_from_list([], L).
+% names_from_list([H|L1], L):-  H = [( _R(PN) :- true )],
+%   append(L, PN, L2),
+%   names_from_list(L1, L2).
+
+names_from_list([],[]).
+names_from_list([H|T],L) :- names_from_list(T,M), [(L:-true)],  PN => L,  write_debug(PN), append(PN, M, L).%N is M+1.
 
 	% write_debug(member([(_A(PN):-true)],Msg4)).
 	% setof(PN,member([(_A(PN):-true)],Msg4),Names).
