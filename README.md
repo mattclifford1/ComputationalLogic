@@ -1,5 +1,15 @@
 [![CircleCI](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus.svg?style=svg)](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus)
 
+## TODO:
+
+- Get list of pronouns
+- Ground rule to general predicate `happy(peter):-teacher(peter)` --> `happy(X) :- teacher(X)`
+- Append to "hard" rulebase as a temporary rulebase
+- Develop a meta-interpreter that uses these rules
+- Check if loops occur (`happy(X):-teacher(X)` will probably conflict with `teacher(X):-happy(X)`)
+- 
+
+
 # Interactive Examples
 Our added functionality is displayed in an online google colab notebook. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mattclifford1/ComputationalLogic/blob/prolexa-plus/Prolexa_Plus_Demo_Notebook.ipynb)
 
