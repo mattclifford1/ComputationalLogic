@@ -14,11 +14,31 @@
 
 prove_question(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
+
 	( prove_rb(Query,Rulebase) ->
+		write_debug(Rulebase),
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
- 	; write_debug('trying negative'), write_debug(not(Query)), prove_rb(not(Query),Rulebase), write_debug("\n\nProved negative! \n") ->
+ 	; write_debug(not(Query)), prove_rb(not(Query),Rulebase), write_debug("\n\nProved negative! \n") ->
+		transform(not(Query),Clauses),
+		phrase(sentence(Clauses),AnswerAtomList),
+		atomics_to_string(AnswerAtomList," ",Answer)
+	%; Answer = 'Sorry, I don\'t think this is the case'
+	).
+
+% Existential quant version
+prove_question(Query,SessionId,Answer):-
+	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
+
+
+	( prove_rb(Query,Rulebase) ->
+		write_debug(Rulebase),
+		transform(Query,Clauses),
+		phrase(sentence(Clauses),AnswerAtomList),
+		atomics_to_string(AnswerAtomList," ",Answer)
+
+ 	; write_debug(not(Query)), prove_rb(not(Query),Rulebase), write_debug("\n\nProved negative! \n") ->
 		transform(not(Query),Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
@@ -32,12 +52,24 @@ prove_question(Query,Answer):-
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
-	; write_debug('trying negative'), prove_rb(not(Query),Rulebase) , write_debug("\n\nProved negative! \n")->
+	; prove_rb(not(Query),Rulebase) , write_debug("\n\nProved negative! \n")->
 		transform(not(Query),Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
 	; Answer = "Sorry, I don\'t think this is the case"
 	).
+
+% % % two-argument version that can be used in maplist/3 (see all_answers/2)
+% find_examples(Query,Answer):-
+% 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
+% 	( prove_rb(Query,Rulebase) ->
+% 		transform(Query,_Clauses),
+% 		Answer = Query
+% 	; prove_rb(not(Query),Rulebase) , write_debug("\n\nProved negative! \n")->
+% 		transform(not(Query),_Clauses),
+% 		Answer = not(Query)
+% 	; Answer = "Sorry, I don\'t think this is the case"
+% 	).
 
 
 %%% Extended version of prove_question/3 that constructs a proof tree %%%
@@ -51,7 +83,7 @@ explain_question(Query,SessionId,Answer):-
 		atomic_list_concat([therefore|L]," ",Last),
 		append(Msg,[Last],Messages),
 		atomic_list_concat(Messages," ; ",Answer)
-	; write_debug('trying negative'), prove_rb(not(Query),Rulebase,[],Proof), write_debug("\n\nProved negative! \n") ->
+	; prove_rb(not(Query),Rulebase,[],Proof), write_debug("\n\nProved negative! \n") ->
 		maplist(pstep2message,Proof,Msg),
 		phrase(sentence1([(not(Query):-true)]),L),
 		atomic_list_concat([therefore|L]," ",Last),
@@ -150,9 +182,51 @@ rule2message(Rule,Message):-
 
 % collect everything that can be proved about a particular Proper Noun
 all_answers(PN,Answer):-
+	% names(Names),
+	% write_debug(Names),
+
+
 	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
+  write_debug(Queries),
+
 	maplist(prove_question,Queries,Msg),
-	delete(Msg,"",Messages),
+	maplist(collect_facts,PN,New_rules),
+	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
+	%delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
+	%write_debug(Messages2),
+
+	%message_testing(Messages2, New_rules),
+	write_debug(New_rules),
+
 	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
-	; otherwise -> atomic_list_concat(Messages,".",Answer)
+	; otherwise -> atomic_list_concat(Messages,". ",Answer)
 	).
+
+
+%names(Names):- setof(R, prolexa:stored_rule(_ID,R), Names).
+
+% collect everything that can be proved about a particular Proper Noun
+collect_facts(PN,New_rules):-
+	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
+  write_debug(Queries),
+	maplist(prove_question,Queries,Msg2),
+	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
+	%write_debug(Messages2),
+
+	message_testing(Messages2, New_rules),
+	write_debug(New_rules).
+
+build_existential_rules(List, Pairs):-
+    setof([(X:-Y)], (member(X, List), member(Y, List)), Matches),
+    delete(Matches, [(X:-X)], Pairs).
+
+message_testing(Messages, Clauses) :-
+	write_debug("\nMessages: "),
+	write_debug(Messages),
+	build_existential_rules(Messages, Clauses).
+
+% atom_facts(PN, New_rules):-
+% 	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries),
+% 	maplist(find_examples,Queries,Msg),
+% 	delete(Msg,"Sorry, I don\'t think this is the case",New_rules),
+% 	write_debug(New_rules).
