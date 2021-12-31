@@ -14,6 +14,8 @@
 
 - just need to find the set of ground atoms `flies(X), bird(X),...` ie `predicate(X)`
 
+- # Check "hard rules" first, then call existential quantifiers if it doesnt work, only apply to "does" or "do" questions, not ground fact questions
+
 # Interactive Examples
 Our added functionality is displayed in an online google colab notebook. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mattclifford1/ComputationalLogic/blob/prolexa-plus/Prolexa_Plus_Demo_Notebook.ipynb)
 
