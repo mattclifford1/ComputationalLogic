@@ -14,8 +14,11 @@
 
 prove_question(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
+	write_debug("prove3"),
+	write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
+		write_debug(Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
  	; prove_rb(not(Query),Rulebase) ->
@@ -28,6 +31,8 @@ prove_question(Query,SessionId,Answer):-
 % two-argument version that can be used in maplist/3 (see all_answers/2)
 prove_question(Query,Answer):-
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
+	write_debug("prove2"),
+	write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
@@ -166,10 +171,12 @@ all_answers(PN,Answer):-
 	maplist(prove_question,Queries,Msg),
 	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
 
+	% our additions ===================================
 	maplist(prove_exists,Queries,Msg2),
 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
 	message_testing(Messages2, Clauses),
 	write_debug(Clauses),
+	% ==================================================
 
 	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
 	; otherwise -> atomic_list_concat(Messages,".",Answer)
