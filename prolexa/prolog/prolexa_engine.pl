@@ -56,6 +56,18 @@ prove_exists(Query,Answer):-
 	; Answer = "Sorry, I don\'t think this is the case"
 	).
 
+clauses_get(Query,Answer):-
+	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
+	( prove_rb(Query,Rulebase) ->
+		transform(Query,Clauses),
+		write_debug(Clauses),
+		Answer = Clauses
+	; prove_rb(not(Query),Rulebase) ->
+		transform(not(Query),Clauses),
+		Answer = Clauses
+	; Answer = "Sorry, I don\'t think this is the case"
+	).
+
 
 %%% Extended version of prove_question/3 that constructs a proof tree %%%
 explain_question(Query,SessionId,Answer):-
@@ -205,7 +217,19 @@ message_testing(Messages, Clauses) :-
 	build_existential_rules(Messages, Clauses).
 
 names(Names):-
-	findall(Q,(pred(teacher,1,_),Q=..[teacher,PN]),Names).
+	findall(Q,(pred(teacher,1,_),Q=..[teacher,PN]),Attributes),
+	maplist(clauses_get,Attributes,Msg3),
+	delete(Msg3,"Sorry, I don\'t think this is the case",Msg4),
+	write_debug('msg4'),
+	write_debug(Msg4).
+
+names_from_list([], L).
+names_from_list([H|L1], [L]):-names_from_list([L1], [H|L]).
+
+	% write_debug(member([(_A(PN):-true)],Msg4)).
+	% setof(PN,member([(_A(PN):-true)],Msg4),Names).
+
+	% findall(Q,(pred(P,1,_),Q=..[P,PN]),Names).
 	% findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries).
 	% findall(Q,(proper_noun(s,PN),Q=..[PN]),Names).
 	% setof(R, prolexa:stored_rule(_ID,R), InterimRules),
