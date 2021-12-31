@@ -18,7 +18,7 @@ prove_question(Query,SessionId,Answer):-
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
- 	; write_debug(not(Query)), prove_rb(not(Query),Rulebase), ->
+ 	; prove_rb(not(Query),Rulebase), ->
 		transform(not(Query),Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
@@ -192,5 +192,16 @@ build_existential_rules(List, Pairs):-
 
 message_testing(Messages, Clauses) :-
 	write_debug("\nMessages: "),
+	names(Names),
+	write_debug(Names),
 	write_debug(Messages),
 	build_existential_rules(Messages, Clauses).
+
+names(Names):-
+	findall(Q,(pred(teacher,1,_),Q=..[teacher,PN]),Names).
+	% findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries).
+	% findall(Q,(proper_noun(s,PN),Q=..[PN]),Names).
+	% setof(R, prolexa:stored_rule(_ID,R), InterimRules),
+	% write_debug(InterimRules),
+	% write_debug(member([(_A(PN):-true)], InterimRules)).
+  % setof(PN, member(_A(PN):-true, InterimRules), Names).
