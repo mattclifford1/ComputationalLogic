@@ -39,6 +39,18 @@ prove_question(Query,Answer):-
 	; Answer = "Sorry, I don\'t think this is the case"
 	).
 
+% finding all the facts associated with an proper noun
+prove_exists(Query,Answer):-
+	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
+	( prove_rb(Query,Rulebase) ->
+		transform(Query,Clauses),
+		Answer = Query
+	; prove_rb(not(Query),Rulebase) ->
+		transform(not(Query),Clauses),
+		Answer = not(Query)
+	; Answer = "Sorry, I don\'t think this is the case"
+	).
+
 
 %%% Extended version of prove_question/3 that constructs a proof tree %%%
 explain_question(Query,SessionId,Answer):-
@@ -153,6 +165,32 @@ all_answers(PN,Answer):-
 	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
 	maplist(prove_question,Queries,Msg),
 	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
+
+	maplist(prove_exists,Queries,Msg2),
+	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
+	message_testing(Messages2, Clauses),
+	write_debug(Clauses),
+
 	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
 	; otherwise -> atomic_list_concat(Messages,".",Answer)
 	).
+
+% collect everything that can be proved about a particular Proper Noun
+collect_facts(PN,New_rules):-
+	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
+  write_debug(Queries),
+	maplist(prove_exists,Queries,Msg2),
+	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
+	%write_debug(Messages2),
+
+	message_testing(Messages2, New_rules),
+	write_debug(New_rules).
+
+build_existential_rules(List, Pairs):-
+  setof([(X:-Y)], (member(X, List), member(Y, List)), Matches),
+  delete(Matches, [(X:-X)], Pairs).
+
+message_testing(Messages, Clauses) :-
+	write_debug("\nMessages: "),
+	write_debug(Messages),
+	build_existential_rules(Messages, Clauses).
