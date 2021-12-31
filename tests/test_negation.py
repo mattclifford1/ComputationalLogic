@@ -16,6 +16,11 @@ def test_negation_explain():
     ans = ask('explain why matt is not a teacher')
     assert ans == 'matt is not happy ; every teacher is happy ; therefore matt is not a teacher'
 
+# the following works in ipython but not python...
+# def test_negation_who():
+#     ans = ask('who is not a teacher')
+#     assert ans == b'pixie is not a teacher'
+
 def test_deletion():
     ask('matt is happy')      # one rule
     ans = ask('is matt happy')
