@@ -58,6 +58,20 @@ sword --> [].
 sword --> [that].
 
 % most of this follows Simply Logical, Chapter 7
+% 
+% sentence_cheese(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).%, [sent1].
+%
+% determiner_cheese(s,X=>B,X=>H,[(H:-B)]) --> [every].
+% determiner_cheese(p,X=>B,X=>H,[(H:-B)]) --> [all].
+%
+% verb_phrase_cheese(s,M) --> [is],property(s,M).
+% verb_phrase_cheese(p,M) --> [are],property(p,M).
+% verb_phrase_cheese(p,M) --> [or],property(p,M).
+% verb_phrase_cheese(N,M) --> iverb(N,M).
+%
+% property_cheese(N,M) --> adjective(N,M).
+% property_cheese(s,M) --> noun(s,M).
+% property(p,M) --> noun(p,M).
 
 
 sentence1(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).%, [sent1].

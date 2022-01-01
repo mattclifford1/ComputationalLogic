@@ -55,7 +55,10 @@ handle_utterance(SessionId,Utterance,Answer):-
 	maplist(string_lower,StringList,StringListLow),	% all lowercase
 	maplist(atom_string,UtteranceList,StringListLow),	% strings to atoms
 % A. Utterance is a sentence
-	( phrase(sentence(Rule),UtteranceList), write_debug(Rule),
+	( phrase(sentence(Rule),UtteranceList),
+		write_debug(Rule),
+		write_debug("phrase/sentence:"),
+		write_debug(phrase(sentence(Rule),UtteranceList)),
 	  % write_debug(rule(Rule)),
 		% write_debug(Rule is (A:-true)),
 		% write_debug(A),

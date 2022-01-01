@@ -31,8 +31,8 @@ prove_question(Query,SessionId,Answer):-
 % two-argument version that can be used in maplist/3 (see all_answers/2)
 prove_question(Query,Answer):-
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
-	write_debug("prove2"),
-	write_debug(Query),
+	% write_debug("prove2"),
+	% write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
@@ -176,6 +176,11 @@ rule2message(Rule,Message):-
 	phrase(sentence1(Rule),Sentence),
 	atomics_to_string(Sentence," ",Message).
 
+% convert rule to sentence (string)
+rule2components(Rule,General_rule):-
+	phrase(sentence(Rule),Components_interim),
+	phrase(sentence(General_rule), Components_interim).
+
 
 % collect everything that can be proved about a particular Proper Noun
 all_answers(PN,Answer):-
@@ -187,37 +192,39 @@ all_answers(PN,Answer):-
 	maplist(prove_exists,Queries,Msg2),
 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
 	message_testing(Messages2, Clauses),
-	write_debug("messages 2"),
-	write_debug(Messages2),
-
-	write_debug("CLAUSES:"),
+	write_debug("\n CLAUSES:"),
 	write_debug(Clauses),
+	write_debug("\n Messages 2"),
+	write_debug(Messages2),
+	write_debug("\nGeneral rules: "),
+	maplist(rule2components, Clauses, Messages3),
+	assert_rules(Messages3),
+	write_debug(Messages3),
+
+
 	% ==================================================
 
 	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
 	; otherwise -> atomic_list_concat(Messages,".",Answer)
 	).
 
-% collect everything that can be proved about a particular Proper Noun
-collect_facts(PN,New_rules):-
-	findall(Q,(pred(P,1,_),Q=..[P,peter]),Queries), % collect known predicates from grammar
-  %write_debug(Queries),
-	maplist(prove_exists,Queries,Msg2),
-	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
-
-
-	message_testing(Messages2, New_rules),
-	write_debug(New_rules).
+% % collect everything that can be proved about a particular Proper Noun
+% collect_facts(PN,New_rules):-
+% 	findall(Q,(pred(P,1,_),Q=..[P,peter]),Queries), % collect known predicates from grammar
+%   %write_debug(Queries),
+% 	maplist(prove_exists,Queries,Msg2),
+% 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
+%
+%
+% 	message_testing(Messages2, New_rules),
+% 	write_debug(New_rules).
 
 build_existential_rules(List, Pairs):-
   setof([(X:-Y)], (member(X, List), member(Y, List)), Matches),
   delete(Matches, [(X:-X)], Pairs).
 
 message_testing(Messages, Clauses) :-
-	write_debug("\nMessages: "),
-	%names(Names),
-	%write_debug("\nNames:"),
-	%write_debug(Names),
+	write_debug("\nMessages in message testing: "),
 	write_debug(Messages),
 	build_existential_rules(Messages, Clauses).
 
@@ -230,24 +237,6 @@ names(Names):-
 	delete(Msg3,"Sorry, I don\'t think this is the case",Msg4),
 	write_debug("MESSAGE 4"),
 	write_debug(Msg4).
-	% write_debug(Msg4),
-	% names_from_list(Msg4, Names).
 
-% names_from_list([], L).
-% names_from_list([H|L1], L):-  H = [( _R(PN) :- true )],
-%   append(L, PN, L2),
-%   names_from_list(L1, L2).
-
-names_from_list([],[]).
-names_from_list([H|T],L) :- names_from_list(T,M), [(L:-true)],  PN => L,  write_debug(PN), append(PN, M, L).%N is M+1.
-
-	% write_debug(member([(_A(PN):-true)],Msg4)).
-	% setof(PN,member([(_A(PN):-true)],Msg4),Names).
-
-	% findall(Q,(pred(P,1,_),Q=..[P,PN]),Names).
-	% findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries).
-	% findall(Q,(proper_noun(s,PN),Q=..[PN]),Names).
-	% setof(R, prolexa:stored_rule(_ID,R), InterimRules),
-	% write_debug(InterimRules),
-	% write_debug(member([(_A(PN):-true)], InterimRules)).
-  % setof(PN, member(_A(PN):-true, InterimRules), Names).
+assert_rules([]).
+assert_rules([H|T]) :- assertz(prolexa:stored_rule(SessionId,H)), assert_rules(T).
