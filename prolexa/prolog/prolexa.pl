@@ -33,12 +33,12 @@ stored_rule(1,[(mortal(X):-human(X))]).
 %stored_rule(1,[(student(X):-not(teacher(X)))]).
 
 stored_rule(1,[(human(peter):-true  )]).
-stored_rule(1,[(teacher(peter):-true )]).
-stored_rule(1,[(not(student(peter)):- true)]).
-
-stored_rule(1,[(student(pixie):-true )]).
-stored_rule(1,[(not(happy(pixie)):-true   )]).
-stored_rule(1,[(not(teacher(pixie)):- true)]).
+% stored_rule(1,[(teacher(peter):-true )]).
+% stored_rule(1,[(not(student(peter)):- true)]).
+%
+% stored_rule(1,[(student(pixie):-true )]).
+% stored_rule(1,[(not(happy(pixie)):-true   )]).
+% stored_rule(1,[(not(teacher(pixie)):- true)]).
 
 
 %%% Prolexa Command Line Interface %%%
@@ -56,21 +56,13 @@ prolexa_cli:-
 % Main predicate that uses DCG as defined in prolexa_grammar.pl
 % to distinguish between sentences, questions and commands
 handle_utterance(SessionId,Utterance,Answer):-
-	write_debug(utterance(Utterance)),
+	% write_debug(utterance(Utterance)),
 	% normalise Utterance into list of atoms
 	split_string(Utterance," ","",StringList),	% tokenize by spaces
 	maplist(string_lower,StringList,StringListLow),	% all lowercase
 	maplist(atom_string,UtteranceList,StringListLow),	% strings to atoms
 % A. Utterance is a sentence
 	( phrase(sentence(Rule),UtteranceList),
-		write_debug(Rule),
-		write_debug("phrase/sentence:"),
-		write_debug(phrase(sentence(Rule),UtteranceList)),
-	  % write_debug(rule(Rule)),
-		% write_debug(Rule is (A:-true)),
-		% write_debug(A),
-		% write_debug((not(A):-true)),
-		% write_debug(A),
 	  ( known_rule(Rule,SessionId) -> % A1. It follows from known rules
 			atomic_list_concat(['I already knew that',Utterance],' ',Answer)
 
@@ -81,7 +73,8 @@ handle_utterance(SessionId,Utterance,Answer):-
 			atomic_list_concat(['I\'ll now remember that ',Utterance],' ',Answer),
 			assertz(prolexa:stored_rule(SessionId,Rule))
 
-		; Rule = [(A :- true)|_], write_debug("trying negation, negative head"), known_rule([(not(A):-true)],SessionId) -> % A2. It contradicts an existing rule
+		; Rule = [(A :- true)|_], % write_debug("trying negation, negative head"),
+		  known_rule([(not(A):-true)],SessionId) -> % A2. It contradicts an existing rule
 			retractall(prolexa:stored_rule(_,[(not(A):-true)])),
 			atomic_list_concat(['I\'ll now remember that ',Utterance],' ',Answer),
 			assertz(prolexa:stored_rule(SessionId,Rule))
@@ -96,14 +89,20 @@ handle_utterance(SessionId,Utterance,Answer):-
 	  write_debug(query(Query)),
 	  prove_question(Query,SessionId,Answer) -> true
 
+% B2. Utterance is a question existenatial that can be answered
+	; phrase(question_e(Query),UtteranceList),
+	  % write_debug('exists Query'),
+	  % write_debug(query(Query)),
+	  prove_question_exists(Query,SessionId,Answer) -> true
+
 % C. Utterance is a command that succeeds
 	; write_debug("Goal: "), write_debug(Goal), phrase(command(g(Goal,Answer)),UtteranceList),
 	  write_debug(goal(Goal)),
 	  call(Goal) -> true
 % D. None of the above
 	; otherwise -> atomic_list_concat(['I heard you say, ',Utterance,', could you rephrase that please?'],' ',Answer)
-	),
-	write_debug(answer(Answer)), write_debug('\n\n').
+	)
+	.
 
 write_debug(Atom):-
 	write(user_error,'*** '),writeln(user_error,Atom),flush_output(user_error).

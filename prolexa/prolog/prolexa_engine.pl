@@ -10,6 +10,39 @@
 :- consult(library).
 :- op(600, xfy, '=>').
 
+
+% handle existential questions
+prove_question_exists(Query,SessionId,Answer):-
+	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
+	transform(Query,ClausesP),
+	(
+    prove_rb_e(Query,Rulebase),!,        % it can be solved
+    transform(Query,Clauses),
+		phrase(sentence(Clauses),AnswerAtomList),
+		atomics_to_string(AnswerAtomList," ",Answer)
+	; Answer = 'Sorry, I don\'t think this is the case'
+	).
+
+%  here until copy_element_e is taken from https://too.simply-logical.space/src/text/3_part_iii/7.3.html
+prove_rb_e(true,_Rulebase):-!.
+prove_rb_e((A,B),Rulebase):-!,
+    prove_rb_e(A,Rulebase),
+    prove_rb_e(B,Rulebase).
+prove_rb_e(A,Rulebase):-
+    find_clause_e((A:-B),Rulebase),
+    prove_rb_e(B,Rulebase).
+
+% find applicable clause in rulebase
+find_clause_e(Clause,[Rule|_Rules]):-
+    copy_element_e(Clause,Rule).  % don't instantiate Rule
+find_clause_e(Clause,[_Rule|Rules]):-
+    find_clause_e(Clause,Rules).
+
+copy_element_e(X,Ys):-
+    member(X1,Ys),
+    copy_term(X1,X).
+
+
 %%% Main question-answering engine adapted from nl_shell.pl %%%
 
 prove_question(Query,SessionId,Answer):-
@@ -34,7 +67,8 @@ prove_question(Query,SessionId,Answer):-
 % two-argument version that can be used in maplist/3 (see all_answers/2)
 prove_question(Query,Answer):-
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
-
+	write_debug("prove2"),
+	write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
@@ -131,15 +165,11 @@ prove_rb(true,_Rulebase,P,P):-  !. %write_debug(" prove rb 1 "),
 
 prove_rb((A,B),Rulebase,P0,P):-!,
 	find_clause((A:-C),Rule,Rulebase),
-	write_debug("P0 in prove 2:"),
-	write_debug(P0),
 	conj_append(C,B,D),
     prove_rb(D,Rulebase,[p((A,B),Rule)|P0],P).
 
 prove_rb(A,Rulebase,P0,P):- %We have A :- true, tries to find A:-B then prove B :- true
     find_clause((A:-B),Rule,Rulebase),% write_debug(Rule),
-		write_debug("P0 in prove 3:"),
-		write_debug(P0),
 	prove_rb(B,Rulebase,[p(A,Rule)|P0],P).
 
 % top-level version that ignores proof
@@ -167,12 +197,14 @@ transform(A,[(A:-true)]).
 all_rules(Answer):-
 	write_debug("all rules called"),
 
-	write_debug("\nNames from grammar:"),
-	proper_nouns(Names),
-	write_debug("\nENTERING RULE ASSERTION"),
-	general_rules(Names),
+	% write_debug("\nNames from grammar:"),
+	% proper_nouns(Names),
+	% write_debug("\nENTERING RULE ASSERTION"),
+	% general_rules(Names),
 
 	findall(R,prolexa:stored_rule(_ID,R),Rules),
+	write_debug('Rules'),
+	write_debug(Rules),
 	maplist(rule2message,Rules,Messages),
 	( Messages=[] -> Answer = "I know nothing"
 	; write_debug('building message,'), otherwise -> atomic_list_concat(Messages,". ",Answer)
