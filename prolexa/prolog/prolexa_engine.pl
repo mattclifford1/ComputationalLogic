@@ -16,6 +16,9 @@ prove_question(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
 	write_debug("prove3"),
 	write_debug(Query),
+
+
+
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		write_debug(Clauses),
@@ -31,6 +34,9 @@ prove_question(Query,SessionId,Answer):-
 % two-argument version that can be used in maplist/3 (see all_answers/2)
 prove_question(Query,Answer):-
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
+
+
+
 	% write_debug("prove2"),
 	% write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
@@ -129,11 +135,15 @@ prove_rb(true,_Rulebase,P,P):-  !. %write_debug(" prove rb 1 "),
 
 prove_rb((A,B),Rulebase,P0,P):-!,
 	find_clause((A:-C),Rule,Rulebase),
+	write_debug("P0 in prove 2:"),
+	write_debug(P0),
 	conj_append(C,B,D),
     prove_rb(D,Rulebase,[p((A,B),Rule)|P0],P).
 
 prove_rb(A,Rulebase,P0,P):- %We have A :- true, tries to find A:-B then prove B :- true
     find_clause((A:-B),Rule,Rulebase),% write_debug(Rule),
+		write_debug("P0 in prove 3:"),
+		write_debug(P0),
 	prove_rb(B,Rulebase,[p(A,Rule)|P0],P).
 
 
@@ -165,6 +175,12 @@ transform(A,[(A:-true)]).
 % collect all stored rules
 all_rules(Answer):-
 	write_debug("all rules called"),
+
+	write_debug("\nNames from grammar:"),
+	proper_nouns(Names),
+	write_debug("\nENTERING RULE ASSERTION"),
+	general_rules(Names),
+
 	findall(R,prolexa:stored_rule(_ID,R),Rules),
 	maplist(rule2message,Rules,Messages),
 	( Messages=[] -> Answer = "I know nothing"
@@ -188,6 +204,26 @@ all_answers(PN,Answer):-
 	maplist(prove_question,Queries,Msg),
 	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
 
+
+
+
+	% ==================================================
+
+	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
+	; otherwise -> atomic_list_concat(Messages,".",Answer)
+	).
+
+% collect everything that can be proved about a particular Proper Noun
+facts_for_name(PN,Messages3):-
+	write_debug("\nentered facts for name\n"),
+	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
+	write_debug("\nfound queries\n"),
+	write_debug(Queries),
+	maplist(prove_question,Queries,Msg),
+	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
+	write_debug("\n Messages"),
+	write_debug(Messages),
+
 	% our additions ===================================
 	maplist(prove_exists,Queries,Msg2),
 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
@@ -198,7 +234,7 @@ all_answers(PN,Answer):-
 	write_debug(Messages2),
 	write_debug("\nGeneral rules: "),
 	maplist(rule2components, Clauses, Messages3),
-	assert_rules(Messages3),
+	%assert_rules(Messages3),
 	write_debug(Messages3),
 
 
@@ -208,16 +244,10 @@ all_answers(PN,Answer):-
 	; otherwise -> atomic_list_concat(Messages,".",Answer)
 	).
 
-% % collect everything that can be proved about a particular Proper Noun
-% collect_facts(PN,New_rules):-
-% 	findall(Q,(pred(P,1,_),Q=..[P,peter]),Queries), % collect known predicates from grammar
-%   %write_debug(Queries),
-% 	maplist(prove_exists,Queries,Msg2),
-% 	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
-%
-%
-% 	message_testing(Messages2, New_rules),
-% 	write_debug(New_rules).
+
+
+general_rules([]):- write_debug("Exit clause called").
+general_rules([H|T]) :- write_debug(H), write_debug(T), facts_for_name(H, _), general_rules(T).
 
 build_existential_rules(List, Pairs):-
   setof([(X:-Y)], (member(X, List), member(Y, List)), Matches),

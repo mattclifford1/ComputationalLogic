@@ -17,22 +17,25 @@
 
 :-prompt(_Old,'prolexa> ').
 
+:- set_prolog_stack(trail,  limit(5 000 000 000)).
+
 
 %some intial stored rules
 stored_rule(1,[(mortal(X):-human(X))]).
 
 %stored_rule(1,[(happy(X):-teacher(X))]).
-stored_rule(1,[(teacher(X):-happy(X))]).
+%stored_rule(1,[(teacher(X):-happy(X))]).
 
 %stored_rule(1,[(not(happy(X)):-not(teacher(X)))]).
-stored_rule(1,[(not(teacher(X)):-not(happy(X)))]).
+%stored_rule(1,[(not(teacher(X)):-not(happy(X)))]).
 
-stored_rule(1,[(teacher(X):-not(student(X)))]).
-stored_rule(1,[(student(X):-not(teacher(X)))]).
+%stored_rule(1,[(teacher(X):-not(student(X)))]).
+%stored_rule(1,[(student(X):-not(teacher(X)))]).
 
-stored_rule(1,[(mortal(peter):-true)]).
-stored_rule(1,[(teacher(peter):-true)]).
-stored_rule(1,[(not(happy(pixie)):-true)]).
+stored_rule(1,[(human(peter):-true  )]).
+stored_rule(1,[(teacher(peter):-true )]).
+stored_rule(1,[(not(happy(pixie)):-true   )]).
+stored_rule(1,[(student(pixie):-true )]).
 
 %%% Prolexa Command Line Interface %%%
 

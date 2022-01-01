@@ -58,7 +58,7 @@ sword --> [].
 sword --> [that].
 
 % most of this follows Simply Logical, Chapter 7
-% 
+%
 % sentence_cheese(C) --> determiner(N,M1,M2,C),noun(N,M1),verb_phrase(N,M2).%, [sent1].
 %
 % determiner_cheese(s,X=>B,X=>H,[(H:-B)]) --> [every].
@@ -138,7 +138,7 @@ determiner_neg(p,X=>B,X=>H,[(not(H):-B)]) --> [all].
 %determiner(p,X=>B,X=>H,[(H:-B)]) --> [].
 %determiner(p, sk=>H1, sk=>H2, [(H1:-true),(H2 :- true)]) -->[some].
 
-
+proper_nouns(Names) :- Names = [peter, pixie].
 proper_noun(s,tweety) --> [tweety].
 proper_noun(s,peter) --> [peter].
 proper_noun(s,subin) --> [subin].
