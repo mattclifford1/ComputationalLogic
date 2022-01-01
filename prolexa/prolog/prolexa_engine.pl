@@ -217,14 +217,17 @@ facts_for_name(PN,New_rulebase):-
 	write_debug(Clauses),
 	write_debug("\n Messages 2"),
 	write_debug(Messages2),
-	maplist(rule2components, Clauses, Exist_rules_2),
-	safe_rules(Exist_rules_2, Exist_rules),
+	list_to_set(Clauses, Clauses_set),
+	maplist(rule2components, Clauses_set, Exist_rules_set),
+	write_debug("\n Exist_rules_set"),
+	write_debug(Exist_rules_set),
+	% safe_rules(Exist_rules_set, Exist_rules),
 	write_debug("\nExistential rules: "),
-	write_debug(Exist_rules),
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase_hard),
 	write_debug("hard rulebase:"), write_debug(Rulebase_hard),
-	append(Exist_rules, Rulebase_hard, New_rulebase),
-	write_debug("\nnew rulebase:"), write_debug(New_rulebase).
+	append(Exist_rules_set, Rulebase_hard, New_rulebase),
+	write_debug("\nnew rulebase:"), write_debug(New_rulebase),
+	assert_rules(New_rulebase).
 
 
 
@@ -239,7 +242,7 @@ message_testing(Messages, Clauses) :-
 	write_debug("\nMessages in message testing: "),
 	write_debug(Messages),
 	build_existential_rules(Messages, Clauses).
-% 
+%
 % names(Names):-
 % 	findall(Q,(pred(P,1,_),Q=..[P,PN]),Attributes),
 % 	write_debug('\nAttributes:'),
@@ -259,6 +262,7 @@ assert_rules([H|T]) :- H= [(A :- B)],
 											 ),
 											 assert_rules(T).
 
+% safe_rules(Exist_rules_2, Exist_rules),
 safe_rules([], Safe_rules).
 safe_rules([H|T], [L]) :- H= [(A :- B)],
 											 (
@@ -266,3 +270,15 @@ safe_rules([H|T], [L]) :- H= [(A :- B)],
 											 known_rule([(A:-B)],SessionId), safe_rules(T, [L]);
 											 safe_rules(T, [H|L])
 											 ).
+
+
+
+% call -- append_not_known(Exist_rules, Hard_rules).
+% known_inlist -> checks if rule in Both_rules list
+
+append_not_known(Exist_rules, [Both_rules]):-
+	(
+	known_inlist([(B:-A)],[Both_rules]), append_not_known(T, [L]);
+	known_inlist([(A:-B)],[Both_rules]), append_not_known(T, [L]);
+	append_not_known(T, [H|L])
+	).
