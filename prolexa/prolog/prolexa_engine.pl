@@ -16,6 +16,10 @@ prove_question_exists(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
 	transform(Query,ClausesP),
 	(
+		write_debug('Query'),
+		write_debug(Query),
+		write_debug('RuleBase'),
+		write_debug(RuleBase),
     prove_rb_e(Query,Rulebase),!,        % it can be solved
     transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),

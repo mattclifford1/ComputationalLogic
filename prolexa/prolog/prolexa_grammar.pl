@@ -164,8 +164,7 @@ question1(Q) --> [does],proper_noun(_,X),verb_phrase(_,X=>Q).
 question1(not(Q)) --> [does],proper_noun(_,X),neg_verb_phrase(_,X=>Q).
 
 
-%%% questions exists %%%
-
+%%% questions exists with skolem constants %%%
 question_e(Q) --> qword,question1_e(Q).
 question1_e((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2). % with skolem
 % question1_e((Q1,Q2)) --> [are,some],noun(p,_X=>Q1),property(p,X=>Q2).
