@@ -15,23 +15,24 @@
 prove_question_exists(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
 	transform(Query,ClausesP),
-	Query = (A, B),
-	write_debug('Query'),
-	write_debug(Query),
-	Query_not = (A, not(B)),
-	write_debug('Query_not'),
-	write_debug(Query_not),
+	% Query = (A, B),
+	% write_debug('Query'),
+	% write_debug(Query),
+	% Query_not = (A, not(B)),
+	% write_debug('Query_not'),
+	% write_debug(Query_not),
 	(
     prove_rb_e(Query,Rulebase),!,        % it can be solved
 		write_debug('Proved'),
     transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
-	; prove_rb_e(Query_not,Rulebase),!,        % it can be solved
-		write_debug('Proved negation'),
-    transform(Query_not,Clauses),
-		phrase(sentence(Clauses),AnswerAtomList),
-		atomics_to_string(AnswerAtomList," ",Answer)
+		% try negative
+	% ; prove_rb_e(Query_not,Rulebase),!,        % it can be solved
+	% 	write_debug('Proved negation'),
+  %   transform(Query_not,Clauses),
+	% 	phrase(sentence(Clauses),AnswerAtomList),
+	% 	atomics_to_string(AnswerAtomList," ",Answer)
 	; Answer = 'Sorry, I don\'t think this is the case'
 	).
 
