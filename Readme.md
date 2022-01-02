@@ -120,7 +120,37 @@ dent is not a teacher. peter is a teacher. pixie is happy
 
 prolexa>
 ```
+# Existential Quantification
+To handle adding rules such as `some humans are teacher` we need to add this to the grammar. This is done using skolem constants:
+```
+determiner(p,sk=>H1,sk=>H2,[(H1:-true),(H2:-true)]) --> [some].
+```
+This translates the sentence `some humans are teacher` to the rule `[(human(sk):-true),(teacher(sk):-true)]`, showing that there does indeed exist someone (sk) that is a human and also a teacher.
 
+To ask questions such as `are some humans teachers` we add to the grammer the form of an existential question:
+```
+question_e(Q) --> qword,question1_e(Q).
+question1_e((Q1,Q2)) --> [are,some],noun(p,sk=>Q1),property(p,sk=>Q2).
+```
+Which for the question `are some humans teachers` will give us the query in the form `human(sk),teacher(sk)`.
+
+This is picked up in `prolexa.pl` using:
+```
+phrase(question_e(Query),UtteranceList)
+```
+to know that we are trying to prove the existential case.
+## Proving existential queries
+For the prover, we take inspiration from chaper 7.3 from the simply logical book. A different prover is needed since we now are trying to prove two separate facts are true (with the same ground atoms -> sk or other).
+```
+prove_rb_e(true,_Rulebase):-!.
+prove_rb_e((A,B),Rulebase):-!,
+    prove_rb_e(A,Rulebase),
+    prove_rb_e(B,Rulebase).
+prove_rb_e(A,Rulebase):-
+    find_clause_e((A:-B),Rulebase),
+    prove_rb_e(B,Rulebase).
+```
+This also allows us to infer existential facts like `some teachers are mortal` when using the rule `every human is mortal`.
 
 
 # Testing
