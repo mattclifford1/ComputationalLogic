@@ -165,7 +165,14 @@ some mortals are happy
 
 prolexa>
 ```
+this uses the rulebase
 
+```
+stored_rule(1,[(mortal(X):-human(X))]).
+
+stored_rule(1,[(mortal(peter):-true)]).
+stored_rule(1,[(teacher(peter):-true)]).
+```
 
 
 
