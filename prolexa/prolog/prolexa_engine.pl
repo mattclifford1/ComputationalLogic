@@ -16,10 +16,6 @@ prove_question_exists(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
 	transform(Query,ClausesP),
 	(
-		write_debug('Query'),
-		write_debug(Query),
-		write_debug('RuleBase'),
-		write_debug(RuleBase),
     prove_rb_e(Query,Rulebase),!,        % it can be solved
     transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
@@ -51,14 +47,8 @@ copy_element_e(X,Ys):-
 
 prove_question(Query,SessionId,Answer):-
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),     % create a list of all the rules and store them in RuleBase
-	write_debug("prove3"),
-	write_debug(Query),
-
-
-
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
-		write_debug(Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
  	; prove_rb(not(Query),Rulebase) ->
@@ -71,8 +61,6 @@ prove_question(Query,SessionId,Answer):-
 % two-argument version that can be used in maplist/3 (see all_answers/2)
 prove_question(Query,Answer):-
 	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
-	write_debug("prove2"),
-	write_debug(Query),
 	( prove_rb(Query,Rulebase) ->
 		transform(Query,Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
@@ -81,38 +69,12 @@ prove_question(Query,Answer):-
 		transform(not(Query),Clauses),
 		phrase(sentence(Clauses),AnswerAtomList),
 		atomics_to_string(AnswerAtomList," ",Answer)
-	; Answer = "Sorry, I don\'t think this is the case"
-	).
-
-% finding all the facts associated with an proper noun
-prove_exists(Query,Answer):-
-	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
-	( prove_rb(Query,Rulebase) ->
-		transform(Query,Clauses),
-		Answer = Query
-	; prove_rb(not(Query),Rulebase) ->
-		transform(not(Query),Clauses),
-		Answer = not(Query)
-	; Answer = "Sorry, I don\'t think this is the case"
-	).
-
-clauses_get(Query,Answer):-
-	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase),
-	( prove_rb(Query,Rulebase) ->
-		transform(Query,Clauses),
-		write_debug(Clauses),
-		Answer = Clauses
-	; prove_rb(not(Query),Rulebase) ->
-		transform(not(Query),Clauses),
-		Answer = Clauses
 	; Answer = "Sorry, I don\'t think this is the case"
 	).
 
 
 %%% Extended version of prove_question/3 that constructs a proof tree %%%
 explain_question(Query,SessionId,Answer):-
-	write_debug('--------'),
-	write_debug(Query),
 	findall(R,prolexa:stored_rule(SessionId,R),Rulebase),
 	( prove_rb(Query,Rulebase,[],Proof) ->
 		maplist(pstep2message,Proof,Msg),
@@ -182,8 +144,6 @@ prove_rb(Q,RB):-
 
 %%% Utilities from nl_shell.pl %%%
 
-
-
 find_clause(Clause,Rule,[Rule|_Rules]):-
 	copy_term(Rule,[Clause]).	% do not instantiate Rule
 find_clause(Clause,Rule,[_Rule|Rules]):-
@@ -200,15 +160,7 @@ transform(A,[(A:-true)]).
 % collect all stored rules
 all_rules(Answer):-
 	write_debug("all rules called"),
-
-	% write_debug("\nNames from grammar:"),
-	% proper_nouns(Names),
-	% write_debug("\nENTERING RULE ASSERTION"),
-	% general_rules(Names),
-
 	findall(R,prolexa:stored_rule(_ID,R),Rules),
-	write_debug('Rules'),
-	write_debug(Rules),
 	maplist(rule2message,Rules,Messages),
 	( Messages=[] -> Answer = "I know nothing"
 	; write_debug('building message,'), otherwise -> atomic_list_concat(Messages,". ",Answer)
@@ -232,89 +184,4 @@ all_answers(PN,Answer):-
 	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
 	( Messages=[] -> atomic_list_concat(['I know nothing about',PN],' ',Answer)
 	; otherwise -> atomic_list_concat(Messages,".",Answer)
-	).
-
-% collect everything that can be proved about a particular Proper Noun
-facts_for_name(PN,New_rulebase):-
-	write_debug("\nentered facts for name\n"),
-	findall(Q,(pred(P,1,_),Q=..[P,PN]),Queries), % collect known predicates from grammar
-	write_debug("\nfound queries\n"),
-	write_debug(Queries),
-	maplist(prove_question,Queries,Msg),
-	delete(Msg,"Sorry, I don\'t think this is the case",Messages),
-	write_debug("\n Messages"),
-	write_debug(Messages),
-
-	% our additions ===================================
-	maplist(prove_exists,Queries,Msg2),
-	delete(Msg2,"Sorry, I don\'t think this is the case",Messages2),
-	message_testing(Messages2, Clauses),
-	write_debug("\n CLAUSES:"),
-	write_debug(Clauses),
-	write_debug("\n Messages 2"),
-	write_debug(Messages2),
-	list_to_set(Clauses, Clauses_set),
-	maplist(rule2components, Clauses_set, Exist_rules_set),
-	write_debug("\n Exist_rules_set"),
-	write_debug(Exist_rules_set),
-	% safe_rules(Exist_rules_set, Exist_rules),
-	write_debug("\nExistential rules: "),
-	findall(R,prolexa:stored_rule(_SessionId,R),Rulebase_hard),
-	write_debug("hard rulebase:"), write_debug(Rulebase_hard),
-	append(Exist_rules_set, Rulebase_hard, New_rulebase),
-	write_debug("\nnew rulebase:"), write_debug(New_rulebase),
-	assert_rules(New_rulebase).
-
-
-
-general_rules([]):- write_debug("Exit clause called").
-general_rules([H|T]) :- write_debug(H), write_debug(T), facts_for_name(H, _), general_rules(T).
-
-build_existential_rules(List, Pairs):-
-  setof([(X:-Y)], (member(X, List), member(Y, List)), Matches),
-  delete(Matches, [(X:-X)], Pairs).
-
-message_testing(Messages, Clauses) :-
-	write_debug("\nMessages in message testing: "),
-	write_debug(Messages),
-	build_existential_rules(Messages, Clauses).
-%
-% names(Names):-
-% 	findall(Q,(pred(P,1,_),Q=..[P,PN]),Attributes),
-% 	write_debug('\nAttributes:'),
-% 	write_debug(Attributes),
-% 	maplist(clauses_get,Attributes,Msg3),
-% 	Names = [peter, subin, pixie, tweety],
-% 	delete(Msg3,"Sorry, I don\'t think this is the case",Msg4),
-% 	write_debug("MESSAGE 4"),
-% 	write_debug(Msg4).
-
-assert_rules([]).
-assert_rules([H|T]) :- H= [(A :- B)],
- 											 (
-											 known_rule([(B:-A)],SessionId);
-											 known_rule([(A:-B)],SessionId);
-											 assertz(prolexa:stored_rule(SessionId,H))
-											 ),
-											 assert_rules(T).
-
-% safe_rules(Exist_rules_2, Exist_rules),
-safe_rules([], Safe_rules).
-safe_rules([H|T], [L]) :- H= [(A :- B)],
-											 (
-											 known_rule([(B:-A)],SessionId), safe_rules(T, [L]);
-											 known_rule([(A:-B)],SessionId), safe_rules(T, [L]);
-											 safe_rules(T, [H|L])
-											 ).
-
-
-
-% call -- append_not_known(Exist_rules, Hard_rules).
-% known_inlist -> checks if rule in Both_rules list
-
-append_not_known(Exist_rules, [Both_rules]):-
-	(
-	known_inlist([(B:-A)],[Both_rules]), append_not_known(T, [L]);
-	known_inlist([(A:-B)],[Both_rules]), append_not_known(T, [L]);
-	append_not_known(T, [H|L])
 	).
