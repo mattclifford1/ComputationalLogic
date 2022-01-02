@@ -1,9 +1,15 @@
-# M. Clifford, A. Davies
 
-# Interactive Examples
+[![CircleCI](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus.svg?style=svg)](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus)
+
+## M. Clifford, A. Davies
+
+# Testing
+Tests for added functionality are found in the [tests directory](./tests). Tests are also validated by on CircleCI's continuous integration server, see badge at the top of this readme.
+
+## Interactive Examples
 Our added functionality is displayed in an online google colab notebook. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mattclifford1/ComputationalLogic/blob/prolexa-plus/Prolexa_Plus_Demo_Notebook.ipynb)
 
-## Extensions of prolexa
+# Extensions of prolexa
 
 We worked on extending Prolexa to handle negation and existential quantification.
 
@@ -178,7 +184,4 @@ stored_rule(1,[(teacher(peter):-true)]).
 
 
 
-# Testing
-Tests for added functionality are found in the [tests directory](./tests). Tests are also validated by on CircleCI's continuous integration server, see badge at the top of this readme.
 
-[![CircleCI](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus.svg?style=svg)](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus)
