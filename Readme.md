@@ -150,7 +150,23 @@ prove_rb_e(A,Rulebase):-
     find_clause_e((A:-B),Rulebase),
     prove_rb_e(B,Rulebase).
 ```
-This also allows us to infer existential facts like `some teachers are mortal` when using the rule `every human is mortal`.
+This also allows us to infer existential facts like `some teachers are mortal` when using the rule `every human is mortal`:
+
+```
+?- prolexa_cli.
+
+prolexa> "some humans are happy".
+
+I will remember that some humans are happy
+
+prolexa> "are some mortals happy".
+
+some mortals are happy
+
+prolexa>
+```
+
+
 
 
 # Testing
