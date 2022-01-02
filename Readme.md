@@ -17,7 +17,7 @@ We worked on extending Prolexa to handle negation and existential quantification
 
 Adding negation - queries of the type `is peter not happy` or responses `peter is not happy` - requires additions to `prolexa.pl`, which handles utterances, `prolexa_engine.pl` which conducts actual proofs and explanations, and `prolexa_grammar.pl`, which allows the use of natural language.
 
-Firstly we extend `prove_question/3`, `prove_question/2`, and `explain_question/3`, to attempt the negative of a given query. For example, should the query be `is peter happy`, and the initial attempt to prove `happy(peter):-true` fails, prolexa now attempts to prove `not(happy(peter)) :- true`. In the case this succeeds it reponds, using additions to the grammar, `peter is not happy`. Should neither succeed it responds `I\'m not able to answer this, try a different question`.
+Firstly we extend `prove_question/3`, `prove_question/2`, and `explain_question/3`, to attempt the negative of a given query. For example, should the query be `is peter happy`, and the initial attempt to prove `happy(peter):-true` fails, prolexa now attempts to prove `not(happy(peter)) :- true`. In the case this succeeds it reponds, using additions to the grammar, `peter is not happy`. Should neither succeed it responds `I'm not able to answer this, try a different question`.
 
 `prove_question/2` is now as follows, with `prove_question/3`, and `explain_question/3` altered in the same manner:
 
