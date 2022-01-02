@@ -81,7 +81,7 @@ stored_rule(1,[(not(teacher(X)):-not(happy(X)))]).
 stored_rule(1,[(student(X):-not(teacher(X)))]).
 
 stored_rule(1,[(teacher(peter):-true )]).
-stored_rule(1,[(not(happy(pixie)):-true   )]).
+stored_rule(1,[(not(happy(maestro)):-true   )]).
 ```
 
 (The 2nd rule is necessary in combination with the first - they do not imply the same thing. The first says that if you are happy you are a teacher, but the second says that everyone not happy is not a teacher, which does not follow from the first, as there could be some teachers who are not happy with only this first rule.)
@@ -91,41 +91,41 @@ The above rulebase allows the following interactions, demonstrating each of our 
 ```
 ?- prolexa_cli.
 
-prolexa> "is pixie a teacher".
+prolexa> "is maestro a teacher".
 
-pixie is not a teacher
+maestro is not a teacher
 
 prolexa> "who is not a teacher".
 
-pixie is not a teacher
+maestro is not a teacher
 
-prolexa> "explain why pixie is a student".
+prolexa> "explain why maestro is a student".
 
-pixie is not happy ; if not teacher then not happy ; every stud
-ent is not a teacher ; therefore pixie is a student
-
-prolexa> "tell me everything you know".
-
-if happy then teacher. if not teacher then not happy. every stu
-dent is not a teacher. peter is a teacher. pixie is not happy
-
-prolexa> "pixie is happy".
-
-I'll now remember that  pixie is happy
+maestro is not happy ; if not teacher then not happy ; every stud
+ent is not a teacher ; therefore maestro is a student
 
 prolexa> "tell me everything you know".
 
 if happy then teacher. if not teacher then not happy. every stu
-dent is not a teacher. peter is a teacher. pixie is happy
+dent is not a teacher. peter is a teacher. maestro is not happy
+
+prolexa> "maestro is happy".
+
+I'll now remember that  maestro is happy
+
+prolexa> "tell me everything you know".
+
+if happy then teacher. if not teacher then not happy. every stu
+dent is not a teacher. peter is a teacher. maestro is happy
 
 prolexa>
 ```
 # Existential Quantification
-To handle adding rules such as `some humans are teacher` we need to add this to the grammar. This is done using skolem constants:
+To handle adding rules such as `some humans are teachers` we need to add this to the grammar. This is done using skolem constants:
 ```
 determiner(p,sk=>H1,sk=>H2,[(H1:-true),(H2:-true)]) --> [some].
 ```
-This translates the sentence `some humans are teacher` to the rule `[(human(sk):-true),(teacher(sk):-true)]`, showing that there does indeed exist someone (sk) that is a human and also a teacher.
+This translates the sentence `some humans are teachers` to the rule `[(human(sk):-true),(teacher(sk):-true)]`, showing that there does indeed exist someone (sk) that is a human and also a teacher.
 
 To ask questions such as `are some humans teachers` we add to the grammer the form of an existential question:
 ```
