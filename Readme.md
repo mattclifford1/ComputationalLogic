@@ -182,6 +182,35 @@ stored_rule(1,[(mortal(peter):-true)]).
 stored_rule(1,[(teacher(peter):-true)]).
 ```
 
+## Possible extensions of existential quantification
 
+We did attempt a more thorough implementation of existential quantification, in which if a query could not be proved with the existing "hard" rulebase, general rules were developed from ground truths.
+
+For example if a rulebase contained
+
+```
+happy(peter) :- true.
+teacher(peter) :- true.
+```
+
+this implementation would be able to develop either of the rules
+
+```
+teacher(X) :- happy(X).
+happy(X) :- teacher(X).
+```
+
+but not both, as this might lead to issues with looping in `prove_rb`.
+
+We were able to establish these existential rules, using a series of new functions, but ran into significant issues with grammar and proof stages. One option was to simply add these rules to the general rulebase, and we were able to do this, but in existential quantification with quantification it would be possible to develop both rules
+
+```
+happy(X):-teacher(X).
+not(happy(X)):-teacher(X).
+```
+
+which would lead to multiple answers to the same query. 
+
+After consistent issues we eventually narrowed our scope to the Skolem constant approach detailed above, due to the scope of this project, but future work could use our retained functions to extend what we've implemented here.
 
 
