@@ -69,7 +69,7 @@ We also add to the `prolexa.pl` main file to check if an added rule directly con
 			atomic_list_concat(['I\'ll now remember that ',Utterance],' ',Answer),
 			assertz(prolexa:stored_rule(SessionId,Rule))
 
-		; Rule = [(A :- true)|_], % write_debug("trying negation, negative head"),
+		; Rule = [(A :- true)|_],
 		  known_rule([(not(A):-true)],SessionId) -> % A2. It contradicts an existing rule
 			retractall(prolexa:stored_rule(_,[(not(A):-true)])),
 			atomic_list_concat(['I\'ll now remember that ',Utterance],' ',Answer),
