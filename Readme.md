@@ -202,7 +202,7 @@ happy(X) :- teacher(X).
 
 but not both, as this might lead to issues with looping in `prove_rb`.
 
-We were able to establish these existential rules, using a series of new functions, but ran into significant issues with grammar and proof stages. One option was to simply add these rules to the general rulebase, and we were able to do this, but in existential quantification with quantification it would be possible to develop both rules
+We were able to establish these existential rules, using a series of new functions, but ran into significant issues with grammar and proof stages. One option was to simply add these rules to the general rulebase, and we were able to do this, but in existential quantification with negation it would be possible to develop both rules
 
 ```
 happy(X):-teacher(X).
