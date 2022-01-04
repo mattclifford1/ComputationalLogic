@@ -184,7 +184,7 @@ stored_rule(1,[(teacher(peter):-true)]).
 
 ## Possible extensions of existential quantification
 
-We did attempt a more thorough implementation of existential quantification, in which if a query could not be proved with the existing "hard" rulebase, general rules were developed from ground truths.
+We did attempt a more thorough implementation of existential quantification, in which if a query could not be proved with the existing "hard" rulebase, general rules were developed from ground truths to prove queries in the existential case.
 
 For example if a rulebase contained
 
@@ -193,7 +193,7 @@ happy(peter) :- true.
 teacher(peter) :- true.
 ```
 
-this implementation would be able to develop either of the rules
+this implementation would be able to develop either of the rules in the "existential" rulebase
 
 ```
 teacher(X) :- happy(X).
