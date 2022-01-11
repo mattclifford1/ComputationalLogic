@@ -1,3 +1,5 @@
+GitHub repo at https://github.com/mattclifford1/ComputationalLogic
+
 
 [![CircleCI](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus.svg?style=svg)](https://circleci.com/gh/mattclifford1/ComputationalLogic/tree/prolexa-plus)
 
